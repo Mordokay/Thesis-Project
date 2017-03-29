@@ -26,7 +26,7 @@ public class NpcMovement : MonoBehaviour {
 	private bool allowDiagonals = false;
 	private bool correctDiagonalSpeed = true;
 	private Vector2 input;
-	private bool isMoving = false;
+	//private bool isMoving = false;
 	private Vector3 startPosition;
 	private Vector3 endPosition;
 	private float t;
@@ -36,6 +36,8 @@ public class NpcMovement : MonoBehaviour {
     public int currentAction = 0;
     private float currentStayTime = 0.0f;
     private bool configuredWalking = false;
+
+    IEnumerable<MyPathNode> currentPath;
 
     public enum actionType
     {
@@ -129,21 +131,30 @@ public class NpcMovement : MonoBehaviour {
 		*/
     }
 
-
+    void ResetPathColor() {
+        if (currentPath != null)
+        {
+            foreach (MyPathNode node in currentPath)
+            {
+                //Debug.Log("Resetting color on " + node.X + "," + node.Y);
+                GameObject.Find(node.X + "," + node.Y).GetComponent<Renderer>().material.color = Color.white;
+            }
+        }
+    }
 
     public void findUpdatedPath(int currentX,int currentY)
 	{
 
 
 		MySolver<MyPathNode, System.Object> aStar = new MySolver<MyPathNode, System.Object>(gameManager.grid);
-		IEnumerable<MyPathNode> path = aStar.Search(new Vector2(currentX, currentY), new Vector2(endGridPosition.x, endGridPosition.y), null);
+		currentPath = aStar.Search(new Vector2(currentX, currentY), new Vector2(endGridPosition.x, endGridPosition.y), null);
 
 
 		int x = 0;
 
-		if (path != null) {
+		if (currentPath != null) {
 		
-			foreach (MyPathNode node in path)
+			foreach (MyPathNode node in currentPath)
 			{
 				if(x==1)
 				{
@@ -162,7 +173,7 @@ public class NpcMovement : MonoBehaviour {
 					g.GetComponent<Renderer>().material.color = Color.white;
 			}
 
-			foreach (MyPathNode node in path)
+			foreach (MyPathNode node in currentPath)
 			{
                 GameObject.Find(node.X + "," + node.Y).GetComponent<Renderer>().material.color = myColor;
             }
@@ -183,45 +194,47 @@ public class NpcMovement : MonoBehaviour {
         {
             currentAction = 0;
         }
-
-        switch (myActions[currentAction].type)
+        else if (myActions.Count > 0)
         {
-            case actionType.stay:
-                //Debug.Log("currentAction: " + currentAction);
-                if (currentStayTime >= myActions[currentAction].duration)
-                {
-                    currentAction++;
-                    currentStayTime = 0.0f;
-                }
-                else
-                {
-                    currentStayTime += Time.deltaTime;
-                }
-                break;
-            case actionType.walk:
-                
-                if (!configuredWalking)
-                {
-                    configuredWalking = true;
+            switch (myActions[currentAction].type)
+            {
+                case actionType.stay:
+                    //Debug.Log("currentAction: " + currentAction);
+                    if (currentStayTime >= myActions[currentAction].duration)
+                    {
+                        currentAction++;
+                        currentStayTime = 0.0f;
+                    }
+                    else
+                    {
+                        currentStayTime += Time.deltaTime;
+                    }
+                    break;
+                case actionType.walk:
 
-                    startGridPosition = new gridPosition((int)myActions[currentAction].startPos.x, (int)myActions[currentAction].startPos.y);
-                    endGridPosition = new gridPosition((int)myActions[currentAction].endPos.x, (int)myActions[currentAction].endPos.y);
-                    initializePosition();
-                    updatePath();
-                    getNextMovement();
-                    //StartCoroutine(move());
+                    if (!configuredWalking)
+                    {
+                        configuredWalking = true;
 
-                    //Debug.Log("currentAction: " + currentAction + " startGridPosition ( " + startGridPosition.x + " , " + startGridPosition.y + " )" + " endGridPosition ( " + endGridPosition.x + " , " + endGridPosition.y + " )");
-                }
+                        startGridPosition = new gridPosition((int)myActions[currentAction].startPos.x, (int)myActions[currentAction].startPos.y);
+                        endGridPosition = new gridPosition((int)myActions[currentAction].endPos.x, (int)myActions[currentAction].endPos.y);
+                        initializePosition();
+                        updatePath();
+                        getNextMovement();
+                        //StartCoroutine(move());
 
-                if(this.transform.position.x == endGridPosition.x && this.transform.position.y == endGridPosition.y)
-                {
-                    //Debug.Log("terminatedWalk ...  startGridPosition ( " + currentGridPosition.x + " , " + currentGridPosition.y + " )" + " endGridPosition ( " + endGridPosition.x + " , " + endGridPosition.y + " )");
-                    currentAction++;
-                    configuredWalking = false;
-                    StopAllCoroutines();
-                }
-                break;
+                        //Debug.Log("currentAction: " + currentAction + " startGridPosition ( " + startGridPosition.x + " , " + startGridPosition.y + " )" + " endGridPosition ( " + endGridPosition.x + " , " + endGridPosition.y + " )");
+                    }
+
+                    if (this.transform.position.x == endGridPosition.x && this.transform.position.y == endGridPosition.y)
+                    {
+                        //Debug.Log("terminatedWalk ...  startGridPosition ( " + currentGridPosition.x + " , " + currentGridPosition.y + " )" + " endGridPosition ( " + endGridPosition.x + " , " + endGridPosition.y + " )");
+                        currentAction++;
+                        configuredWalking = false;
+                        StopAllCoroutines();
+                    }
+                    break;
+            }
         }
 	}
     
@@ -250,7 +263,7 @@ public class NpcMovement : MonoBehaviour {
 
 	
 	public IEnumerator move() {
-		isMoving = true;
+		//isMoving = true;
 		startPosition = transform.position;
 		t = 0;
 
@@ -280,7 +293,7 @@ public class NpcMovement : MonoBehaviour {
 			yield return null;
 		}
 
-		isMoving = false;
+		//isMoving = false;
 		getNextMovement ();
 		
 		yield return 0;
@@ -289,7 +302,8 @@ public class NpcMovement : MonoBehaviour {
 	
 	void updatePath()
 	{
-		findUpdatedPath (currentGridPosition.x, currentGridPosition.y);
+        ResetPathColor();
+        findUpdatedPath (currentGridPosition.x, currentGridPosition.y);
 	}
 	
 	void getNextMovement()
@@ -333,7 +347,7 @@ public class NpcMovement : MonoBehaviour {
 		this.gameObject.transform.position = getGridPosition (startGridPosition.x, startGridPosition.y);
 		currentGridPosition.x = startGridPosition.x;
 		currentGridPosition.y = startGridPosition.y;
-		isMoving = false;
+		//isMoving = false;
 		GameObject.Find(startGridPosition.x + "," + startGridPosition.y).GetComponent<Renderer>().material.color = Color.black; 
 
 	}

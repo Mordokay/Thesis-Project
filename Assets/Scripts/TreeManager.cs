@@ -13,12 +13,14 @@ public class TreeManager : MonoBehaviour {
     public GameObject treeCut;
 
     public GameObject lineNpcEvent;
-    public List<GameObject> linesToNpc;
+    List<GameObject> linesToNpc;
 
     GameManager gameManager;
 
     void Start()
     {
+        linesToNpc = new List<GameObject>();
+        
         for(int i = 0; i < npcThatCanSee.Count; i++)
         {
             GameObject lineToNPC = Instantiate(lineNpcEvent);

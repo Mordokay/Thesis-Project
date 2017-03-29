@@ -13,6 +13,8 @@ public class CameraFollowPlayer : MonoBehaviour {
 
     void Start()
     {
+        this.transform.position = GameObject.FindGameObjectWithTag("Player").transform.position;
+        this.transform.Translate(new Vector3(0, 0, -10));
         startPos = this.transform.position;
         isMoving = false;
         gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
@@ -41,6 +43,7 @@ public class CameraFollowPlayer : MonoBehaviour {
     {
         if (Input.GetKey(KeyCode.W) && !isMoving && !gameManager.grid[(int)this.transform.position.x, (int)(this.transform.position.y + 1.0f)].IsWall)
         {
+
             StartCoroutine(move(0f, 1.0f));
         }
         if (Input.GetKey(KeyCode.A) && !isMoving && !gameManager.grid[(int)(this.transform.position.x - 1), (int)this.transform.position.y].IsWall)

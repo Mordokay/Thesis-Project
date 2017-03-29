@@ -5,7 +5,6 @@ using UnityEngine;
 [CustomEditor(typeof(GameManager))]
 public class GameManagerEditor : Editor {
 
-    bool hasGrid = false;
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
@@ -15,20 +14,12 @@ public class GameManagerEditor : Editor {
         if (GUILayout.Button("Create Grid"))
         {
             gm.createGrid();
-            hasGrid = true;
+            //hasGrid = true;
         }
         if (GUILayout.Button("Remove Grid"))
         {
             gm.removeGrid();
-            hasGrid = false;
-        }
-        if (GUILayout.Button("Add NPC"))
-        {
-            gm.createEnemy();
-        }
-        if (GUILayout.Button("LoadMap"))
-        {
-            gm.LoadMap();
+            //hasGrid = false;
         }
     }
 }

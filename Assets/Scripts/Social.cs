@@ -10,7 +10,6 @@ public class Social : MonoBehaviour {
     public float talkDistance;
 
     public GameObject MessageBallon;
-    GameManager gameManager;
 
     [SerializeField]
     public List<Aquaintance> myAquaintances;
@@ -76,7 +75,6 @@ public class Social : MonoBehaviour {
             linesNpcToNpcTalk.Add(lineToNPCTalk);
         }
         MessageBallon.SetActive(false);
-        gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
         InvokeRepeating("Talk", 0.0f, 0.5f);
     }
 
