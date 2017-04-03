@@ -34,8 +34,9 @@ public class NpcMovement : MonoBehaviour {
 	public Color myColor;
 
     public int currentAction = 0;
-    private float currentStayTime = 0.0f;
+    public float currentStayTime = 0.0f;
     private bool configuredWalking = false;
+    public bool isWaiting;
 
     IEnumerable<MyPathNode> currentPath;
 
@@ -48,14 +49,19 @@ public class NpcMovement : MonoBehaviour {
     [Serializable]
     public class Action
     {
+        //[SerializeField]
+        //public actionType type;
+        //[SerializeField]
+        //public float duration;
+        //[SerializeField]
+        //public Vector2 startPos;
+        //[SerializeField]
+        //public Vector2 endPos;
+
         [SerializeField]
-        public actionType type;
+        public Vector2 pos;
         [SerializeField]
-        public float duration;
-        [SerializeField]
-        public Vector2 startPos;
-        [SerializeField]
-        public Vector2 endPos;
+        public float wait;
     }
 
 	public class MySolver<TPathNode, TUserContext> : SettlersEngine.SpatialAStar<TPathNode, 
@@ -107,6 +113,7 @@ public class NpcMovement : MonoBehaviour {
 	void Start () {
 
         gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
+        isWaiting = false;
 
         //myColor = getRandomColor();
         //this.GetComponent<Renderer>().material.color = myColor;
@@ -188,8 +195,49 @@ public class NpcMovement : MonoBehaviour {
 		return tmpCol;
 
 	}
-	// Update is called once per frame
-	void Update () {
+
+    void Update()
+    {
+        if (currentAction == myActions.Count)
+        {
+            currentAction = 0;
+        }
+        else if (myActions.Count > 0)
+
+            if (isWaiting == true)
+            {
+                currentStayTime += Time.deltaTime;
+                if (currentStayTime >= myActions[currentAction].wait)
+                {
+                    //After player moves to endGridPosition he waits X seconds before starting next action
+                    currentAction++;
+
+                    Debug.Log(currentAction);
+                    currentStayTime = 0.0f;
+                    isWaiting = false;
+                }
+            }
+            else if (!configuredWalking && !isWaiting)
+            {
+                configuredWalking = true;
+
+                startGridPosition = new gridPosition((int)this.transform.position.x, (int)this.transform.position.y);
+                endGridPosition = new gridPosition((int)myActions[currentAction].pos.x, (int)myActions[currentAction].pos.y);
+                initializePosition();
+                updatePath();
+                getNextMovement();
+                //StartCoroutine(move());
+
+                //Debug.Log("currentAction: " + currentAction + " startGridPosition ( " + startGridPosition.x + " , " + startGridPosition.y + " )" + " endGridPosition ( " + endGridPosition.x + " , " + endGridPosition.y + " )");
+            }
+            else if (this.transform.position.x == endGridPosition.x && this.transform.position.y == endGridPosition.y)
+            {
+                //Debug.Log("terminatedWalk ...  startGridPosition ( " + currentGridPosition.x + " , " + currentGridPosition.y + " )" + " endGridPosition ( " + endGridPosition.x + " , " + endGridPosition.y + " )");
+                isWaiting = true;
+                configuredWalking = false;
+                StopAllCoroutines();
+            }
+        /*
         if (currentAction == myActions.Count)
         {
             currentAction = 0;
@@ -236,13 +284,17 @@ public class NpcMovement : MonoBehaviour {
                     break;
             }
         }
-	}
+        */
+    }
     
 	public float moveSpeed;
 	
+    [Serializable]
 	public class gridPosition{
-		public int x =0;
-		public int y=0;
+        [SerializeField]
+        public int x =0;
+        [SerializeField]
+        public int y=0;
 
 		public gridPosition()
 		{
@@ -310,7 +362,6 @@ public class NpcMovement : MonoBehaviour {
 	{
 		updatePath();
 		
-
 		input.x = 0;
 		input.y = 0;
 		if (nextNode.X > currentGridPosition.x) {
@@ -348,7 +399,7 @@ public class NpcMovement : MonoBehaviour {
 		currentGridPosition.x = startGridPosition.x;
 		currentGridPosition.y = startGridPosition.y;
 		//isMoving = false;
-		GameObject.Find(startGridPosition.x + "," + startGridPosition.y).GetComponent<Renderer>().material.color = Color.black; 
+		//GameObject.Find(startGridPosition.x + "," + startGridPosition.y).GetComponent<Renderer>().material.color = Color.black; 
 
 	}
 }

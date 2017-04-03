@@ -70,8 +70,11 @@ public class Social : MonoBehaviour {
         for (int i = 0; i < myAquaintances.Count; i++)
         {
             GameObject lineToNPC = Instantiate(line);
+            lineToNPC.transform.parent = line.transform.parent;
             linesNpcToNpc.Add(lineToNPC);
+
             GameObject lineToNPCTalk = Instantiate(lineTalk);
+            lineToNPCTalk.transform.parent = lineTalk.transform.parent;
             linesNpcToNpcTalk.Add(lineToNPCTalk);
         }
         MessageBallon.SetActive(false);

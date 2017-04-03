@@ -24,6 +24,7 @@ public class TreeManager : MonoBehaviour {
         for(int i = 0; i < npcThatCanSee.Count; i++)
         {
             GameObject lineToNPC = Instantiate(lineNpcEvent);
+            lineToNPC.transform.parent = lineNpcEvent.transform.parent;
             linesToNpc.Add(lineToNPC);
         }
         gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
