@@ -41,9 +41,9 @@ public class CameraFollowPlayer : MonoBehaviour {
 
     void Update()
     {
+        /*
         if (Input.GetKey(KeyCode.W) && !isMoving && !gameManager.grid[(int)this.transform.position.x, (int)(this.transform.position.y + 1.0f)].IsWall)
         {
-
             StartCoroutine(move(0f, 1.0f));
         }
         if (Input.GetKey(KeyCode.A) && !isMoving && !gameManager.grid[(int)(this.transform.position.x - 1), (int)this.transform.position.y].IsWall)
@@ -58,5 +58,6 @@ public class CameraFollowPlayer : MonoBehaviour {
         {
             StartCoroutine(move(1.0f, 0.0f));
         }
+        */
     }
 }

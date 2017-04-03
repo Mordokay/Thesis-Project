@@ -137,7 +137,7 @@ public class NpcMovement : MonoBehaviour {
             foreach (MyPathNode node in currentPath)
             {
                 //Debug.Log("Resetting color on " + node.X + "," + node.Y);
-                GameObject.Find(node.X + "," + node.Y).GetComponent<Renderer>().material.color = Color.white;
+                //GameObject.Find(node.X + "," + node.Y).GetComponent<Renderer>().material.color = Color.white;
             }
         }
     }
@@ -175,7 +175,7 @@ public class NpcMovement : MonoBehaviour {
 
 			foreach (MyPathNode node in currentPath)
 			{
-                GameObject.Find(node.X + "," + node.Y).GetComponent<Renderer>().material.color = myColor;
+                //GameObject.Find(node.X + "," + node.Y).GetComponent<Renderer>().material.color = myColor;
             }
 		}
 		

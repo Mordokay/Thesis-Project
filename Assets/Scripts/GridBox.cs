@@ -5,6 +5,7 @@ public class GridBox : MonoBehaviour {
 
 	private GameManager Game;
     public bool isWall;
+    public bool isWatter;
 
     void Start () {
 

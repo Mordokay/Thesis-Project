@@ -38,24 +38,33 @@ public class PlayerMovement : MonoBehaviour {
     }
 
     void Update() {
-        if (Input.GetKey(KeyCode.W) && !isMoving && !gameManager.grid[(int)this.transform.position.x, (int)(this.transform.position.y + 1.0f)].IsWall)
+        //!gameManager.grid[(int)this.transform.position.x, (int)(this.transform.position.y + 1.0f)].IsWater
+        if (Input.GetKey(KeyCode.W) && !isMoving && !gameManager.grid[(int)this.transform.position.x, (int)(this.transform.position.y + 1.0f)].IsWall &&
+            !gameManager.grid[(int)this.transform.position.x, (int)(this.transform.position.y + 1.0f)].IsWater)
         {
             StartCoroutine(move(0f, 1.0f));
+            StartCoroutine(Camera.main.GetComponent<CameraFollowPlayer>().move(0f, 1.0f));
             this.GetComponent<Animator>().SetTrigger("walkUp");
         }
-        if (Input.GetKey(KeyCode.A) && !isMoving && !gameManager.grid[(int)(this.transform.position.x - 1), (int)this.transform.position.y].IsWall)
+        if (Input.GetKey(KeyCode.A) && !isMoving && !gameManager.grid[(int)(this.transform.position.x - 1), (int)this.transform.position.y].IsWall &&
+            !gameManager.grid[(int)(this.transform.position.x - 1), (int)this.transform.position.y].IsWater)
         {
             StartCoroutine(move(-1.0f, 0.0f));
+            StartCoroutine(Camera.main.GetComponent<CameraFollowPlayer>().move(-1.0f, 0.0f));
             this.GetComponent<Animator>().SetTrigger("walkLeft");
         }
-        if (Input.GetKey(KeyCode.S) && !isMoving && !gameManager.grid[(int)this.transform.position.x, (int)(this.transform.position.y - 1.0f)].IsWall)
+        if (Input.GetKey(KeyCode.S) && !isMoving && !gameManager.grid[(int)this.transform.position.x, (int)(this.transform.position.y - 1.0f)].IsWall &&
+            !gameManager.grid[(int)this.transform.position.x, (int)(this.transform.position.y - 1.0f)].IsWater)
         {
             StartCoroutine(move(0f, -1.0f));
+            StartCoroutine(Camera.main.GetComponent<CameraFollowPlayer>().move(0f, -1.0f));
             this.GetComponent<Animator>().SetTrigger("walkDown");
         }
-        else if (Input.GetKey(KeyCode.D) && !isMoving && !gameManager.grid[(int)(this.transform.position.x + 1), (int)this.transform.position.y].IsWall)
+        else if (Input.GetKey(KeyCode.D) && !isMoving && !gameManager.grid[(int)(this.transform.position.x + 1), (int)this.transform.position.y].IsWall &&
+            !gameManager.grid[(int)(this.transform.position.x + 1), (int)this.transform.position.y].IsWater)
         {
             StartCoroutine(move(1.0f, 0.0f));
+            StartCoroutine(Camera.main.GetComponent<CameraFollowPlayer>().move(1.0f, 0.0f));
             this.GetComponent<Animator>().SetTrigger("walkRight");
         }
     }

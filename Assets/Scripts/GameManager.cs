@@ -1,18 +1,20 @@
 ﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 using System;
-using System.Text;
-using System.IO;
 
 public class GameManager : MonoBehaviour {
 
     public int messageId = 0;
 	public MyPathNode[,] grid;
     public GameObject gridBox;
+
+    public List<Sprite> groundSprites;
+    
     public GameObject map;
     public int gridWidth;
 	public int gridHeight;
 	public float gridSize;
-    public string mapToLoad;
 	public static string distanceType;
 
 	public static int distance = 2;
@@ -37,10 +39,18 @@ public class GameManager : MonoBehaviour {
 
 				nobj.gameObject.transform.parent = map.transform;
 				nobj.SetActive(true);
-
+                PaintBlock(nobj);
 			}
 		}
 	}
+
+    void PaintBlock(GameObject myGridBox)
+    {
+        if(groundSprites.Count > 0)
+        {
+            myGridBox.GetComponent<SpriteRenderer>().sprite = groundSprites[UnityEngine.Random.Range(0, groundSprites.Count)];
+        }
+    }
 
     public void removeGrid()
     {
@@ -63,6 +73,7 @@ public class GameManager : MonoBehaviour {
             grid[int.Parse(entries[0]), int.Parse(entries[1])] = new MyPathNode()
             {
                 IsWall = gridBox.gameObject.GetComponent<GridBox>().isWall,
+                IsWater = gridBox.gameObject.GetComponent<GridBox>().isWatter,
                 X = int.Parse(entries[0]),
                 Y = int.Parse(entries[1]),
             };
