@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-public class ObjectGathererController : MonoBehaviour {
+public class KillController : MonoBehaviour {
+
 
     RaycastHit2D hit;
 
     public float viewDistance;
     List<GameObject> npcThatCanSee;
-    public GameObject ObjectFull;
-    public GameObject ObjectGathered;
     public GameObject lineNpcEvent;
 
     List<GameObject> linesToNpc;
@@ -36,6 +35,21 @@ public class ObjectGathererController : MonoBehaviour {
         gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
     }
 
+    void RemoveKilledObject()
+    {
+        if (whoAmI.Equals(GameManager.objectType.rabbit))
+        {
+            GameObject blood = Instantiate(Resources.Load("BloodSpatter")) as GameObject;
+            blood.transform.position = this.transform.position;
+        }
+        for (int i = linesToNpc.Count - 1; i >= 0; i--)
+        {
+            //Debug.Log("Destroy line: " + linesToNpc[i].name);
+            Destroy(linesToNpc[i]);
+        }
+        Destroy(this.gameObject);
+    }
+
     bool LineOfSight(Transform target)
     {
         hit = Physics2D.Linecast(transform.position + (target.position - transform.position).normalized, target.position);
@@ -49,18 +63,11 @@ public class ObjectGathererController : MonoBehaviour {
 
     void OnMouseDown()
     {
-        //Debug.Log("Touching tree");
-        if (ObjectFull.activeSelf)
-        {
-            gatherObject();
-        }
+        killObject();
     }
 
-    void gatherObject()
+    void killObject()
     {
-        ObjectFull.SetActive(false);
-        ObjectGathered.SetActive(true);
-
         //Event still happens even if no NPC is around to see it
         int eventId = gameManager.getNewId();
 
@@ -75,7 +82,8 @@ public class ObjectGathererController : MonoBehaviour {
                 List<Social.interest> interests = new List<Social.interest>();
                 foreach (Social.interest objectInterest in interestTypes)
                 {
-                    foreach (Social.Interest npcInterest in npc.GetComponent<Social>().interests) {
+                    foreach (Social.Interest npcInterest in npc.GetComponent<Social>().interests)
+                    {
                         //If object interest is the same as the NPC interest .... have to check the weight
                         if (npcInterest.interest.Equals(objectInterest))
                         {
@@ -87,6 +95,8 @@ public class ObjectGathererController : MonoBehaviour {
                 npc.GetComponent<Social>().showBalloonCorotine(whoAmI);
             }
         }
+
+        RemoveKilledObject();
     }
 
     void Update()

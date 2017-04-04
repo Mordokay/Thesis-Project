@@ -25,6 +25,7 @@ public class Social : MonoBehaviour {
 
     public GameObject berrieBalloonIcon;
     public GameObject treeBalloonIcon;
+    public GameObject rabbitBalloonIcon;
 
     public float talkCooldownTime;
     float lastTalkTime;
@@ -38,6 +39,7 @@ public class Social : MonoBehaviour {
         gathering,
         wood,
         killing,
+        hunting,
         farming,
         weather
     };
@@ -61,13 +63,13 @@ public class Social : MonoBehaviour {
         [SerializeField]
         public int id;
         [SerializeField]
-        public ObjectGathererController.objectType actionObject;
+        public GameManager.objectType actionObject;
         [SerializeField]
         public float timeOfLife;
 
         public Message() { }
 
-        public Message(List<interest> tags, string message, int id, ObjectGathererController.objectType objectType, float lifeTime)
+        public Message(List<interest> tags, string message, int id, GameManager.objectType objectType, float lifeTime)
         {
             this.messageTags = tags;
             this.message = message;
@@ -110,21 +112,33 @@ public class Social : MonoBehaviour {
         InvokeRepeating("Talk", 0.0f, 0.5f);
     }
 
-    public IEnumerator ShowBalloon(ObjectGathererController.objectType type)
+    public void showBalloonCorotine(GameManager.objectType type)
+    {
+        StartCoroutine(ShowBalloon(type));
+    }
+
+    public IEnumerator ShowBalloon(GameManager.objectType type)
     {
         switch (type)
         {
-            case ObjectGathererController.objectType.simpleTree:
+            case GameManager.objectType.simpleTree:
                 treeBalloonIcon.SetActive(true);
                 break;
-            case ObjectGathererController.objectType.berries:
+            case GameManager.objectType.berries:
                 berrieBalloonIcon.SetActive(true);
+                break;
+            case GameManager.objectType.rabbit:
+                rabbitBalloonIcon.SetActive(true);
+                break;
+            case GameManager.objectType.butterfly:
+                //balloon for the butterfly comes HERE
                 break;
         }
         MessageBalloon.SetActive(true);
         yield return new WaitForSeconds(3.0f);
         treeBalloonIcon.SetActive(false);
         berrieBalloonIcon.SetActive(false);
+        rabbitBalloonIcon.SetActive(false);
         MessageBalloon.SetActive(false);
         StopCoroutine("ShowBalloon");
     }
@@ -154,8 +168,6 @@ public class Social : MonoBehaviour {
                     Vector3.Distance(transform.position, aquaintaince.npc.transform.position) < talkDistance)
                     //&& aquaintaince.npc.GetComponent<Social>().CanTalk())
                 {
-                    lastTalkTime = Time.timeSinceLevelLoad;
-
                     float biggestMessageWeight = 0.0f;
                     Message mostImportantMessage = new Message();
                     foreach (Message message in information)
@@ -191,6 +203,8 @@ public class Social : MonoBehaviour {
                     //Check if there is an important message to send
                     if (biggestMessageWeight > 0.0f)
                     {
+                        //Only if the player really sends a message to an aquaintance does the talking cooldown start
+                        lastTalkTime = Time.timeSinceLevelLoad;
 
                         Debug.Log("NPC " + this.name + " told " + aquaintaince.npc.name + " about " + mostImportantMessage.actionObject.ToString());
 

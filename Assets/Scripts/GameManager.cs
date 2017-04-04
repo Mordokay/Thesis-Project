@@ -19,7 +19,15 @@ public class GameManager : MonoBehaviour {
 
 	public static int distance = 2;
 
-	void Start () {
+    public enum objectType
+    {
+        simpleTree,
+        berries,
+        rabbit,
+        butterfly
+    };
+
+    void Start () {
         bakeObstacles();
     }
 

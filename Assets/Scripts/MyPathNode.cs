@@ -11,7 +11,7 @@ public class MyPathNode : SettlersEngine.IPathNode<System.Object>
 
     public bool IsWalkable(System.Object unused)
 	{
-		return !IsWall;
+		return !IsWall && !IsWater;
 	}
 
     public bool canSwim(System.Object unused)
