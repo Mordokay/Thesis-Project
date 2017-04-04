@@ -13,8 +13,8 @@ public class NpcMovement : MonoBehaviour {
 
     public Sprite npcUp;
     public Sprite npcDown;
-    public Sprite npcFront;
-    public Sprite npcBack;
+    public Sprite npcRight;
+    public Sprite npcLeft;
 
     public List<Action> myActions;
 
@@ -37,6 +37,8 @@ public class NpcMovement : MonoBehaviour {
     public float currentStayTime = 0.0f;
     private bool configuredWalking = false;
     public bool isWaiting;
+
+    public bool makeIdle = false;
 
     IEnumerable<MyPathNode> currentPath;
 
@@ -203,18 +205,24 @@ public class NpcMovement : MonoBehaviour {
             currentAction = 0;
         }
         else if (myActions.Count > 0)
-
+        {
             if (isWaiting == true)
             {
+                if (this.GetComponent<Animator>())
+                {
+                    this.GetComponent<Animator>().SetTrigger("Idle");
+                    makeIdle = true;
+                }
                 currentStayTime += Time.deltaTime;
                 if (currentStayTime >= myActions[currentAction].wait)
                 {
                     //After player moves to endGridPosition he waits X seconds before starting next action
                     currentAction++;
 
-                    Debug.Log(currentAction);
+                    //Debug.Log(currentAction);
                     currentStayTime = 0.0f;
                     isWaiting = false;
+                    makeIdle = false;
                 }
             }
             else if (!configuredWalking && !isWaiting)
@@ -237,63 +245,13 @@ public class NpcMovement : MonoBehaviour {
                 configuredWalking = false;
                 StopAllCoroutines();
             }
-        /*
-        if (currentAction == myActions.Count)
-        {
-            currentAction = 0;
         }
-        else if (myActions.Count > 0)
-        {
-            switch (myActions[currentAction].type)
-            {
-                case actionType.stay:
-                    //Debug.Log("currentAction: " + currentAction);
-                    if (currentStayTime >= myActions[currentAction].duration)
-                    {
-                        currentAction++;
-                        currentStayTime = 0.0f;
-                    }
-                    else
-                    {
-                        currentStayTime += Time.deltaTime;
-                    }
-                    break;
-                case actionType.walk:
-
-                    if (!configuredWalking)
-                    {
-                        configuredWalking = true;
-
-                        startGridPosition = new gridPosition((int)myActions[currentAction].startPos.x, (int)myActions[currentAction].startPos.y);
-                        endGridPosition = new gridPosition((int)myActions[currentAction].endPos.x, (int)myActions[currentAction].endPos.y);
-                        initializePosition();
-                        updatePath();
-                        getNextMovement();
-                        //StartCoroutine(move());
-
-                        //Debug.Log("currentAction: " + currentAction + " startGridPosition ( " + startGridPosition.x + " , " + startGridPosition.y + " )" + " endGridPosition ( " + endGridPosition.x + " , " + endGridPosition.y + " )");
-                    }
-
-                    if (this.transform.position.x == endGridPosition.x && this.transform.position.y == endGridPosition.y)
-                    {
-                        //Debug.Log("terminatedWalk ...  startGridPosition ( " + currentGridPosition.x + " , " + currentGridPosition.y + " )" + " endGridPosition ( " + endGridPosition.x + " , " + endGridPosition.y + " )");
-                        currentAction++;
-                        configuredWalking = false;
-                        StopAllCoroutines();
-                    }
-                    break;
-            }
-        }
-        */
     }
     
 	public float moveSpeed;
 	
-    [Serializable]
 	public class gridPosition{
-        [SerializeField]
         public int x =0;
-        [SerializeField]
         public int y=0;
 
 		public gridPosition()
@@ -349,7 +307,6 @@ public class NpcMovement : MonoBehaviour {
 		getNextMovement ();
 		
 		yield return 0;
-		
 	}
 	
 	void updatePath()
@@ -360,27 +317,42 @@ public class NpcMovement : MonoBehaviour {
 	
 	void getNextMovement()
 	{
-		updatePath();
+        updatePath();
 		
 		input.x = 0;
 		input.y = 0;
 		if (nextNode.X > currentGridPosition.x) {
 			input.x = 1;
-			this.GetComponent<SpriteRenderer>().sprite = npcFront;
+			this.GetComponent<SpriteRenderer>().sprite = npcRight;
+            if (this.GetComponent<Animator>())
+            {
+                this.GetComponent<Animator>().SetTrigger("WalkRight");
+            }
 		}
-		if (nextNode.Y > currentGridPosition.y) {
+        if (nextNode.Y > currentGridPosition.y) {
 			input.y = 1;
 			this.GetComponent<SpriteRenderer>().sprite = npcUp;
-		}
+            if (this.GetComponent<Animator>())
+            {
+                this.GetComponent<Animator>().SetTrigger("WalkUp");
+            }
+        }
 		if (nextNode.Y < currentGridPosition.y) {
 			input.y = -1;
 			this.GetComponent<SpriteRenderer>().sprite = npcDown;
-		}
+            if (this.GetComponent<Animator>())
+            {
+                this.GetComponent<Animator>().SetTrigger("WalkDown");
+            }
+        }
 		if (nextNode.X < currentGridPosition.x) {
 			input.x = -1;
-			this.GetComponent<SpriteRenderer>().sprite = npcBack;
-		}
-		
+			this.GetComponent<SpriteRenderer>().sprite = npcLeft;
+            if (this.GetComponent<Animator>())
+            {
+                this.GetComponent<Animator>().SetTrigger("WalkLeft");
+            }
+        }
 		StartCoroutine (move ());
 	}
 

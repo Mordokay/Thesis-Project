@@ -1,27 +1,39 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
-public class TreeManager : MonoBehaviour {
+public class ObjectGathererController : MonoBehaviour {
 
     RaycastHit2D hit;
+
     public float viewDistance;
-
     public List<GameObject> npcThatCanSee;
-
-    public GameObject treeFull;
-    public GameObject treeCut;
-
+    public GameObject ObjectFull;
+    public GameObject ObjectGathered;
     public GameObject lineNpcEvent;
+
     List<GameObject> linesToNpc;
 
+    public List<Social.interest> interestTypes;
+
+    public string actionMessage;
+    public string talkMessage;
     GameManager gameManager;
+
+    public objectType whoAmI;
+
+    public enum objectType
+    {
+        simpleTree,
+        berries
+    };
 
     void Start()
     {
         linesToNpc = new List<GameObject>();
-        
-        for(int i = 0; i < npcThatCanSee.Count; i++)
+        npcThatCanSee = GameObject.FindGameObjectsWithTag("NPC").ToList<GameObject>();
+        for (int i = 0; i < npcThatCanSee.Count; i++)
         {
             GameObject lineToNPC = Instantiate(lineNpcEvent);
             lineToNPC.transform.parent = lineNpcEvent.transform.parent;
@@ -34,26 +46,26 @@ public class TreeManager : MonoBehaviour {
     {
         hit = Physics2D.Linecast(transform.position + (target.position - transform.position).normalized, target.position);
         if (hit && hit.collider.transform == target)
-            {
+        {
 
-                return true;
-            }
+            return true;
+        }
         return false;
     }
 
     void OnMouseDown()
     {
-        Debug.Log("Touching tree");
-        if (treeFull.activeSelf)
+        //Debug.Log("Touching tree");
+        if (ObjectFull.activeSelf)
         {
-            breakTree();
+            gatherObject();
         }
     }
 
-    void breakTree()
+    void gatherObject()
     {
-        treeFull.SetActive(false);
-        treeCut.SetActive(true);
+        ObjectFull.SetActive(false);
+        ObjectGathered.SetActive(true);
 
         //Event still happens even if no NPC is around to see it
         int eventId = gameManager.getNewId();
@@ -63,11 +75,22 @@ public class TreeManager : MonoBehaviour {
             if (LineOfSight(npc.transform) && Vector3.Distance(transform.position, npc.transform.position) < npc.GetComponent<Social>().viewDistance)
             {
                 //Warn villager of event
-                Debug.Log(npc.name + " saw player breaking a tree!");
-                if (npc.GetComponent<Social>().interests.Contains(Social.interest.gatheringWood)){
-                    npc.GetComponent<Social>().information.Add(new Social.Message(Social.interest.gatheringWood, 1, "Player gathered some wood", eventId));
-                    StartCoroutine(npc.GetComponent<Social>().ShowBaloon());
+                Debug.Log(npc.name + actionMessage);
+                //Chesk all action tags with the NPC interests
+
+                List<Social.interest> interests = new List<Social.interest>();
+                foreach (Social.interest objectInterest in interestTypes)
+                {
+                    foreach (Social.Interest npcInterest in npc.GetComponent<Social>().interests) {
+                        //If object interest is the same as the NPC interest .... have to check the weight
+                        if (npcInterest.interest.Equals(objectInterest))
+                        {
+                            interests.Add(objectInterest);
+                        }
+                    }
                 }
+                npc.GetComponent<Social>().information.Add(new Social.Message(interests, talkMessage, eventId, whoAmI, npc.GetComponent<Social>().messageForgetTime));
+                StartCoroutine(npc.GetComponent<Social>().ShowBalloon(whoAmI));
             }
         }
     }
@@ -88,6 +111,6 @@ public class TreeManager : MonoBehaviour {
                 linesToNpc[i].SetActive(false);
             }
         }
-            
+
     }
 }

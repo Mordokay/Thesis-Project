@@ -9,12 +9,12 @@ public class Social : MonoBehaviour {
     public float viewDistance;
     public float talkDistance;
 
-    public GameObject MessageBallon;
+    public GameObject MessageBalloon;
 
     [SerializeField]
     public List<Aquaintance> myAquaintances;
     [SerializeField]
-    public List<interest> interests;
+    public List<Interest> interests;
     [SerializeField]
     public List<Message> information;
 
@@ -23,9 +23,18 @@ public class Social : MonoBehaviour {
     public GameObject lineTalk;
     public List<GameObject> linesNpcToNpcTalk;
 
+    public GameObject berrieBalloonIcon;
+    public GameObject treeBalloonIcon;
+
+    public float talkCooldownTime;
+    float lastTalkTime;
+
+    public float messageForgetTime;
+
     public enum interest
     {
         gatheringWood,
+        gatheringBerries,
         gathering,
         wood,
         killing,
@@ -46,22 +55,42 @@ public class Social : MonoBehaviour {
     public class Message
     {
         [SerializeField]
-        public interest typeOfMessage;
-        [SerializeField]
-        public float weight;
+        public List<interest> messageTags;
         [SerializeField]
         public string message;
         [SerializeField]
         public int id;
+        [SerializeField]
+        public ObjectGathererController.objectType actionObject;
+        [SerializeField]
+        public float timeOfLife;
 
         public Message() { }
 
-        public Message(interest myInterest, float weight, string message, int id)
+        public Message(List<interest> tags, string message, int id, ObjectGathererController.objectType objectType, float lifeTime)
         {
-            this.typeOfMessage = myInterest;
-            this.weight = weight;
+            this.messageTags = tags;
             this.message = message;
             this.id = id;
+            this.actionObject = objectType;
+            this.timeOfLife = lifeTime;
+        }
+    };
+
+    [Serializable]
+    public class Interest
+    {
+        [SerializeField]
+        public interest interest;
+        [SerializeField]
+        public float weight;
+        
+        public Interest() { }
+
+        public Interest(interest myInterest, float weight)
+        {
+            this.interest = myInterest;
+            this.weight = weight;
         }
     };
 
@@ -77,16 +106,27 @@ public class Social : MonoBehaviour {
             lineToNPCTalk.transform.parent = lineTalk.transform.parent;
             linesNpcToNpcTalk.Add(lineToNPCTalk);
         }
-        MessageBallon.SetActive(false);
+        MessageBalloon.SetActive(false);
         InvokeRepeating("Talk", 0.0f, 0.5f);
     }
 
-    public IEnumerator ShowBaloon()
+    public IEnumerator ShowBalloon(ObjectGathererController.objectType type)
     {
-        MessageBallon.SetActive(true);
+        switch (type)
+        {
+            case ObjectGathererController.objectType.simpleTree:
+                treeBalloonIcon.SetActive(true);
+                break;
+            case ObjectGathererController.objectType.berries:
+                berrieBalloonIcon.SetActive(true);
+                break;
+        }
+        MessageBalloon.SetActive(true);
         yield return new WaitForSeconds(3.0f);
-        MessageBallon.SetActive(false);
-        StopCoroutine("ShowBaloon");
+        treeBalloonIcon.SetActive(false);
+        berrieBalloonIcon.SetActive(false);
+        MessageBalloon.SetActive(false);
+        StopCoroutine("ShowBalloon");
     }
 
     bool LineOfSight(Transform target)
@@ -99,42 +139,94 @@ public class Social : MonoBehaviour {
         return false;
     }
 
+    public bool CanTalk()
+    {
+        return Time.timeSinceLevelLoad - lastTalkTime > talkCooldownTime;
+    }
     void Talk()
     {
-        foreach (Aquaintance aquaintaince in myAquaintances)
+        if (CanTalk())
         {
-            if (LineOfSight(aquaintaince.npc.transform) && Vector3.Distance(transform.position, aquaintaince.npc.transform.position) < talkDistance)
+            foreach (Aquaintance aquaintaince in myAquaintances)
             {
-                foreach(Message message in information)
+                //If giver of information can talk
+                if (LineOfSight(aquaintaince.npc.transform) && 
+                    Vector3.Distance(transform.position, aquaintaince.npc.transform.position) < talkDistance)
+                    //&& aquaintaince.npc.GetComponent<Social>().CanTalk())
                 {
-                    //Check if they share an interest
-                    //TODO add a minimum friendship level for message to be sent
-                    if (aquaintaince.npc.GetComponent<Social>().interests.Contains(message.typeOfMessage))
+                    lastTalkTime = Time.timeSinceLevelLoad;
+
+                    float biggestMessageWeight = 0.0f;
+                    Message mostImportantMessage = new Message();
+                    foreach (Message message in information)
                     {
                         //check if aquaintance already has that message
                         bool alreadyHasMessage = false;
-                        foreach(Message aquaintanceMessage in aquaintaince.npc.GetComponent<Social>().information)
+                        foreach (Message aquaintanceMessage in aquaintaince.npc.GetComponent<Social>().information)
                         {
-                            if(aquaintanceMessage.id == message.id)
+                            if (aquaintanceMessage.id == message.id)
                             {
                                 alreadyHasMessage = true;
                             }
                         }
                         if (!alreadyHasMessage)
                         {
-                            Debug.Log("NPC " + this.name + " told " + aquaintaince.npc.name + " about " + message.typeOfMessage.ToString());
-                            aquaintaince.npc.GetComponent<Social>().information.Add(new Social.Message(message.typeOfMessage, 1, "Player gathered some wood", message.id));
-                            StartCoroutine(ShowBaloon());
-                            StartCoroutine(aquaintaince.npc.GetComponent<Social>().ShowBaloon());
+                            //Check aquaintance interests with message tags to determine how important is that message
+                            float messageTotalWeight = 0.0f;
+                            foreach (Interest aquaintanceInterest in aquaintaince.npc.GetComponent<Social>().interests)
+                            {
+                                if (message.messageTags.Contains(aquaintanceInterest.interest))
+                                {
+                                    messageTotalWeight += aquaintanceInterest.weight;
+                                }
+                            }
+                            //Check if this is the most important message to send
+                            if (messageTotalWeight > biggestMessageWeight)
+                            {
+                                biggestMessageWeight = messageTotalWeight;
+                                mostImportantMessage = message;
+                            }
                         }
+                    }
+                    //Check if there is an important message to send
+                    if (biggestMessageWeight > 0.0f)
+                    {
+
+                        Debug.Log("NPC " + this.name + " told " + aquaintaince.npc.name + " about " + mostImportantMessage.actionObject.ToString());
+
+                        //NPC remembers the message again if he talks about it. It resets the message time of life.
+                        mostImportantMessage.timeOfLife = messageForgetTime;
+
+                        aquaintaince.npc.GetComponent<Social>().information.Add(
+                            new Message(mostImportantMessage.messageTags, mostImportantMessage.message, mostImportantMessage.id,
+                            mostImportantMessage.actionObject, messageForgetTime));
+
+                        StartCoroutine(ShowBalloon(mostImportantMessage.actionObject));
+                        StartCoroutine(aquaintaince.npc.GetComponent<Social>().ShowBalloon(mostImportantMessage.actionObject));
                     }
                 }
             }
         }
     }
 
+    void MessageDecay()
+    {
+        foreach(Message myMessage in information)
+        {
+            myMessage.timeOfLife -= Time.deltaTime;
+        }
+        for (int i = information.Count - 1; i >= 0; i--)
+        {
+            if (information[i].timeOfLife < 0.0f)
+            {
+                information.RemoveAt(i);
+            }
+        }
+    }
+
     void Update()
     {
+        MessageDecay();
         for (int i = 0; i < myAquaintances.Count; i++)
         {
             if (LineOfSight(myAquaintances[i].npc.transform) && Vector3.Distance(transform.position, myAquaintances[i].npc.transform.position) < talkDistance)

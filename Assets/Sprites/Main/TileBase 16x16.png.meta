@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: e09416ffe5f410944ae5b4c610b87a2a
-timeCreated: 1491314910
+timeCreated: 1491328724
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -4070,6 +4070,19 @@ TextureImporter:
         serializedVersion: 2
         x: 121
         y: 152
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: TileBase 16x16_247
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 135
         width: 16
         height: 16
       alignment: 0

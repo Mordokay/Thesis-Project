@@ -33,7 +33,7 @@ public class PlayerMovement : MonoBehaviour {
         }
 
         isMoving = false;
-        this.GetComponent<Animator>().SetTrigger("idle");
+        this.GetComponent<Animator>().SetTrigger("Idle");
         yield return 0;
     }
 
@@ -44,28 +44,28 @@ public class PlayerMovement : MonoBehaviour {
         {
             StartCoroutine(move(0f, 1.0f));
             StartCoroutine(Camera.main.GetComponent<CameraFollowPlayer>().move(0f, 1.0f));
-            this.GetComponent<Animator>().SetTrigger("walkUp");
+            this.GetComponent<Animator>().SetTrigger("WalkUp");
         }
         if (Input.GetKey(KeyCode.A) && !isMoving && !gameManager.grid[(int)(this.transform.position.x - 1), (int)this.transform.position.y].IsWall &&
             !gameManager.grid[(int)(this.transform.position.x - 1), (int)this.transform.position.y].IsWater)
         {
             StartCoroutine(move(-1.0f, 0.0f));
             StartCoroutine(Camera.main.GetComponent<CameraFollowPlayer>().move(-1.0f, 0.0f));
-            this.GetComponent<Animator>().SetTrigger("walkLeft");
+            this.GetComponent<Animator>().SetTrigger("WalkLeft");
         }
         if (Input.GetKey(KeyCode.S) && !isMoving && !gameManager.grid[(int)this.transform.position.x, (int)(this.transform.position.y - 1.0f)].IsWall &&
             !gameManager.grid[(int)this.transform.position.x, (int)(this.transform.position.y - 1.0f)].IsWater)
         {
             StartCoroutine(move(0f, -1.0f));
             StartCoroutine(Camera.main.GetComponent<CameraFollowPlayer>().move(0f, -1.0f));
-            this.GetComponent<Animator>().SetTrigger("walkDown");
+            this.GetComponent<Animator>().SetTrigger("WalkDown");
         }
         else if (Input.GetKey(KeyCode.D) && !isMoving && !gameManager.grid[(int)(this.transform.position.x + 1), (int)this.transform.position.y].IsWall &&
             !gameManager.grid[(int)(this.transform.position.x + 1), (int)this.transform.position.y].IsWater)
         {
             StartCoroutine(move(1.0f, 0.0f));
             StartCoroutine(Camera.main.GetComponent<CameraFollowPlayer>().move(1.0f, 0.0f));
-            this.GetComponent<Animator>().SetTrigger("walkRight");
+            this.GetComponent<Animator>().SetTrigger("WalkRight");
         }
     }
 }

@@ -6,7 +6,6 @@ public class CameraFollowPlayer : MonoBehaviour {
 
     Vector3 startPos;
     Vector3 endPos;
-    bool isMoving;
     float t;
     public float moveSpeed;
     GameManager gameManager;
@@ -16,13 +15,11 @@ public class CameraFollowPlayer : MonoBehaviour {
         this.transform.position = GameObject.FindGameObjectWithTag("Player").transform.position;
         this.transform.Translate(new Vector3(0, 0, -10));
         startPos = this.transform.position;
-        isMoving = false;
         gameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
     }
 
     public IEnumerator move(float x, float y)
     {
-        isMoving = true;
         startPos = this.transform.position;
         t = 0;
 
@@ -34,8 +31,6 @@ public class CameraFollowPlayer : MonoBehaviour {
             transform.position = Vector3.Lerp(startPos, endPos, t);
             yield return null;
         }
-
-        isMoving = false;
         yield return 0;
     }
 
